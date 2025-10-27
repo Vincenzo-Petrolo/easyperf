@@ -2,12 +2,15 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 // This file is in charge of doing argument parsing.
 
 typedef enum {
+    HELP  = 100, // Special
     NUMBER = 0,
-    STRING = 1
+    STRING = 1,
+    FLAG   = 2
 } arg_type_t;
 
 typedef int (*validate_fn)(void *);
@@ -18,6 +21,7 @@ typedef struct arg_t {
     union {
         long int ivalue; // integer value if the arg is a value
         char    *svalue; // String pointer if the argument is a string
+        uint8_t  bvalue;
     };
     arg_type_t type; // Type of the argument
     char *description; // String description for this argument

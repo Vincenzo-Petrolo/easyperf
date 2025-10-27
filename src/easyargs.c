@@ -88,14 +88,43 @@ static int validate_output(void *arg) {
     return err;
 }
 
+static int validate_config(void *arg) {
+    const char **path_str_ptr = (const char **) arg;
+    const char *path_str = *path_str_ptr;
 
+    // Check if the file exists and is readable
+    if (access(path_str, R_OK) != 0) {
+        return -1;
+    }
+
+    return 0;
+}
 
 static arg_t args[] = {
     {"--process",   "-p",{.svalue = NULL           }, STRING, "The absolute path to an executable that should be executed alongside the profiling. (Default=None)", validate_process},
     {"--time",      "-t",{.ivalue = 10L            }, NUMBER,  "The total time (in seconds) for the processing. (Default=10 seconds)", validate_time },
     {"--output",    "-o",{.svalue="easyperf.csv"   }, STRING,  "The output file for the profiling results. (Default=easyperf.csv)", validate_output },
-    {"--sleep",     "-s",{.ivalue=1L               }, NUMBER,  "The sleep interval between samples. (Default=1s)", validate_time }
+    {"--sleep",     "-s",{.ivalue=1L               }, NUMBER,  "The sleep interval between samples. (Default=1s)", validate_time },
+    {"--config",    "-c",{.svalue=NULL             }, STRING,  "The configuration file (a .txt) for the profiling with the enabled events. If none, all will be enabled. (Default=None)", validate_config },
+    {"--help",      "-h",{.bvalue=0                }, HELP,    "Prints the help for all the commands and exits.", NULL },
+    {"--list",      "-l",{.bvalue=0                }, FLAG,    "Lists all the possible events and exits.", NULL }
 };
+
+
+// This function prints the help message and then exits.
+static void print_help(void) {
+    for (size_t i = 0; i < sizeof(args)/sizeof(args[0]); i++) {
+        fprintf(stdout, "%s, %s: %s\n", args[i].arg, args[i].shortarg, args[i].description);
+    }
+
+    fprintf(stdout, "\nExample usage:\n");
+    fprintf(stdout, "  easyperf --process ls --time 20 --output result.csv --sleep 2\n");
+    fprintf(stdout, "  easyperf -p /bin/ls -t 20 -o result.csv -s 2\n");
+    fprintf(stdout, "\n");
+
+    // Exit after printing help
+    exit(0);
+}
 
 
 
@@ -123,6 +152,12 @@ int easyargs_parse(int argc, char *argv[]) {
                     args[i].ivalue = atol((const char *)value);
                     break;
                 
+                case FLAG:
+                    args[i].bvalue = 1;
+                    break;
+                case HELP:
+                    print_help();
+                    break;
                 default:
                     break;
                 }
@@ -157,6 +192,10 @@ int easyargs_getbyname(char *name, void *vvalue) {
             
             case NUMBER:
                 *(long *)vvalue = args[i].ivalue;
+                break;
+
+            case FLAG:
+                *(uint8_t *)vvalue = args[i].bvalue;
                 break;
             
             default:

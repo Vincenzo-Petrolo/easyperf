@@ -3,9 +3,21 @@
 #include <string.h>
 
 static FILE *fp = NULL;
+static char *filename = NULL;
 
 static int write_csv(sample *samples, size_t len) {
     static int first_time = 1;
+
+    if (first_time) {
+        fp = fopen(filename, "w");
+    } else {
+        fp = fopen(filename, "a");
+    }
+
+    if (fp == NULL) {
+        fprintf(stderr, "Error opening output file: %s\n", filename);
+        return -1;
+    }
 
     if (first_time) {
         // Add the header for the first time write
@@ -32,6 +44,8 @@ static int write_csv(sample *samples, size_t len) {
 
     fputc('\n', fp);
 
+    fclose(fp);
+
     return 0;
 }
 
@@ -45,16 +59,7 @@ static easywriter writer = {
 
 
 int easywriter_init(char *pathname) {
-
-    if (!fp) {
-        fp = fopen(pathname, "w");
-
-        if (!fp) {
-            fprintf(stderr, "Could not open file %s from %s\n", pathname, __func__);
-            exit(1);
-        }
-    }
-
+    filename = strdup(pathname);
     return 0;
 }
 

@@ -31,11 +31,14 @@ typedef struct {
     uint64_t value;
 } sample;
 
-// This function enables the event from a standard list. Pass the event by name.
-// If the event exists then it returns 0, else -1.
-int easyevent_enable(char *name);
+// This function enables the event from a standard list in a file. If the
+// filename is NULL, then all events are enabled.
+int easyevent_enable(char *filename);
 
 // This function returns an array of all enabled events. The sample array is
 // allocated by us and freed by the user. The passed array is NULL in the
 // beginning.
 void easyevent_sample(sample **, size_t *size);
+
+// This function prints all the available events to stdout.
+void easyevent_print_all(void);

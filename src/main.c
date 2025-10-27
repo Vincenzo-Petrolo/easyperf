@@ -10,8 +10,10 @@
 int main(int argc, char *argv[]) {
     char *process_name = NULL;
     char *output_file = NULL;
+    char *config_file = NULL;
     long int time = 0;
     long int sleep_time = 0;
+    uint8_t list = 0;
     sample *samples_start, *samples_end;
 
     // Initialize to NULL both
@@ -21,6 +23,14 @@ int main(int argc, char *argv[]) {
 
     if (easyargs_parse(argc, argv) != 0) {
         return 1;
+    }
+
+    // Check if the user wanted to list the available events
+    if (easyargs_getbyname("--list", (void *)&list) == 0) {
+        if (list) {
+            easyevent_print_all();
+            return 0;
+        }
     }
 
     if (easyargs_getbyname("--process", (void *)&process_name) == 0) {
@@ -39,18 +49,9 @@ int main(int argc, char *argv[]) {
         printf("Output file to save results to: %s\n", output_file);
     }
 
-    if (easyevent_enable("Context Switches") != 0) {
-        printf("Event: Context Switches is not present. Skipping\n");
-    }
 
-#ifdef __riscv
-    easyevent_enable("mcycle");
-    easyevent_enable("minstret");
-    easyevent_enable("l1 dcache_misses");
-    easyevent_enable("l1 icache_misses");
-    easyevent_enable("l1 dcache_evictions");
-    easyevent_enable("DTLB misses");
-#endif
+    easyargs_getbyname("--config", (void *)&config_file);
+    easyevent_enable(config_file);
 
     easywriter_init(output_file);
 
