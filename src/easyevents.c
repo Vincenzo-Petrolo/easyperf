@@ -11,8 +11,9 @@
 	__tmp; \
 })
 
-volatile
-static inline uint64_t
+static
+inline
+uint64_t
 read_cycles()
 {
 	uint64_t tmp;
@@ -22,8 +23,9 @@ read_cycles()
 	return tmp;
 }
 
-volatile
-static inline uint64_t
+static 
+inline 
+uint64_t
 read_instret()
 {
 	uint64_t tmp;
@@ -77,8 +79,8 @@ static uint64_t read_ctx_switches(void) {
 event_t events[] = {
     /* Micro-architectural CSR Events */
 #ifdef __riscv
-    {"mcycle",                CSR,  read_mcycle,           0},
-    {"minstret",              CSR,  read_minstret,         0},
+    {"mcycle",                CSR,  read_cycles,           0},
+    {"minstret",              CSR,  read_instret,         0},
     {"l1 dcache_misses",      CSR,  read_hpmcounter3,      0},
     {"l1 icache_misses",      CSR,  read_hpmcounter4,      0},
     {"l1 dcache_evictions",   CSR,  read_hpmcounter5,      0},
