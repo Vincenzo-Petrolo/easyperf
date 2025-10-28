@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
     long int time = 0;
     long int sleep_time = 0;
     uint8_t list = 0;
+    pid_t pid;
     sample *samples_start, *samples_end;
 
     // Initialize to NULL both
@@ -52,17 +53,21 @@ int main(int argc, char *argv[]) {
 
     easyargs_getbyname("--config", (void *)&config_file);
     easyevent_enable(config_file);
+    printf("Enabled events from config file: %s\n", config_file ? config_file : "None");
 
     easywriter_init(output_file);
+    printf("Initialized writer to output file: %s\n", output_file ? output_file : "None");
 
-    // Spawn the child
-    pid_t pid = fork();
-
-    if (pid == 0) {
-        // I am the child here, run the program
-        execlp(process_name, process_name, NULL);
-
-        exit(0);
+    if (process_name != NULL) {
+        // Spawn the child
+        pid = fork();
+        
+        if (pid == 0) {
+            // I am the child here, run the program
+            execlp(process_name, process_name, NULL);
+            
+            exit(0);
+        }
     }
 
     for (long int t = 0; t < time; t+=sleep_time)
@@ -82,13 +87,15 @@ int main(int argc, char *argv[]) {
         easywriter_write(samples_end, tot_events);
     }
 
-    // Once I am done, kill the process if it is not done yet
-    kill(pid, SIGTERM);
-
-    int status;
-    pid_t r = waitpid(pid, &status, 0);
-    if (r == -1) {
-        perror("waitpid");
+    if (process_name != NULL) {
+        // Once I am done, kill the process if it is not done yet
+        kill(pid, SIGTERM);
+        
+        int status;
+        pid_t r = waitpid(pid, &status, 0);
+        if (r == -1) {
+            perror("waitpid");
+        }
     }
 
     return 0;
