@@ -132,8 +132,8 @@ event_t events[] = {
     {"minstret",              CSR,  read_instret,          0},
     {"l1 dcache_misses",      CSR,  read_hpmcounter3,      0},
     {"l1 icache_misses",      CSR,  read_hpmcounter4,      0},
-    {"l1 dcache_evictions",   CSR,  read_hpmcounter5,      0},
-    {"DTLB misses",           CSR,  read_hpmcounter6,      0},
+    {"load_accesses",         CSR,  read_hpmcounter5,      0},
+    {"store_accesses",        CSR,  read_hpmcounter6,      0},
     /* Platform events              */
     {"LLC Misses",            CSR,  read_hpmcounter7,      0},
     {"LLC evictions",         CSR,  read_hpmcounter8,      0},
