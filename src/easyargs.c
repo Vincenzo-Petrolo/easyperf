@@ -4,6 +4,7 @@
 #include <libgen.h>
 
 #define PATH_MAX 300
+#define EASYPERF_VERSION "0.1.0"
 
 int is_executable_in_path(const char *cmd) {
     if (!cmd || !*cmd)
@@ -107,7 +108,8 @@ static arg_t args[] = {
     {"--sleep",     "-s",{.ivalue=1L               }, NUMBER,  "The sleep interval between samples. (Default=1s)", validate_time },
     {"--config",    "-c",{.svalue=NULL             }, STRING,  "The configuration file (a .txt) for the profiling with the enabled events. If none, all will be enabled. (Default=None)", validate_config },
     {"--help",      "-h",{.bvalue=0                }, HELP,    "Prints the help for all the commands and exits.", NULL },
-    {"--list",      "-l",{.bvalue=0                }, FLAG,    "Lists all the possible events and exits.", NULL }
+    {"--list",      "-l",{.bvalue=0                }, FLAG,    "Lists all the possible events and exits.", NULL },
+    {"--version",   "-v",{.bvalue=0                }, VERSION_FLAG, "Prints the version and exits.", NULL }
 };
 
 
@@ -126,6 +128,10 @@ static void print_help(void) {
     exit(0);
 }
 
+static void print_version(void) {
+    fprintf(stdout, "easyperf version %s\n", EASYPERF_VERSION);
+    exit(0);
+}
 
 
 int easyargs_parse(int argc, char *argv[]) {
@@ -133,43 +139,55 @@ int easyargs_parse(int argc, char *argv[]) {
     // --process <name>, or -p <name>. 
     // The argument shall be parsed and then validated.
 
-    for (int j = 1; j < argc; j+=2) {
+    int j = 1;
+    while (j < argc) {
         char *arg = argv[j];
-        char *value = argv[j+1];
+        int matched = 0;
 
         for (size_t i = 0; i < sizeof(args)/sizeof(args[0]); i++)
         {
             if (strncmp(args[i].arg, arg, strlen(args[i].arg)) == 0 ||
                 strncmp(args[i].shortarg, arg, strlen(args[i].shortarg)) == 0 ) {
 
-                switch (args[i].type)
-                {
-                case STRING:
-                    args[i].svalue = value;
-                    break;
-
-                case NUMBER:
-                    args[i].ivalue = atol((const char *)value);
-                    break;
+                matched = 1;
                 
-                case FLAG:
-                    args[i].bvalue = 1;
-                    break;
-                case HELP:
-                    print_help();
-                    break;
-                default:
-                    break;
-                }
-                
-                // Validate the argument
-                if (args[i].validate) {
-                    if (args[i].validate((void *)&(args[i].svalue)) != 0) {
-                        fprintf(stderr, "Invalid argument for %s\n", args[i].arg);
-                        return -1;
+                if (args[i].type == FLAG || args[i].type == HELP || args[i].type == VERSION_FLAG) {
+                    if (args[i].type == FLAG) {
+                        args[i].bvalue = 1;
+                    } else if (args[i].type == HELP) {
+                        print_help();
+                    } else {
+                        print_version();
                     }
+                    j++;
+                } else {
+                    if (j + 1 >= argc) {
+                         fprintf(stderr, "Error: Missing value for argument %s\n", arg);
+                         return -1;
+                    }
+                    char *value = argv[j+1];
+
+                    if (args[i].type == STRING) {
+                        args[i].svalue = value;
+                    } else if (args[i].type == NUMBER) {
+                        args[i].ivalue = atol((const char *)value);
+                    }
+
+                    // Validate the argument
+                    if (args[i].validate) {
+                        if (args[i].validate((void *)&(args[i].svalue)) != 0) {
+                            fprintf(stderr, "Invalid argument for %s\n", args[i].arg);
+                            return -1;
+                        }
+                    }
+                    j += 2;
                 }
+                break;
             }
+        }
+
+        if (!matched) {
+            j++;
         }
     }
     

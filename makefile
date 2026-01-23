@@ -13,3 +13,6 @@ easyperf: $(OBJS) ${BUILD_DIR}/
 
 %/:
 	mkdir -p $@
+
+clean:
+	rm -f easyperf

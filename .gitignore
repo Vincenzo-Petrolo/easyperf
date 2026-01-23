@@ -5,3 +5,5 @@ build/
 easyperf
 *.pdf
 *.png
+__pycache__/
+*.pyc
