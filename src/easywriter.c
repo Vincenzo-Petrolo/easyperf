@@ -1,6 +1,7 @@
 #include <easywriter.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 static FILE *fp = NULL;
 static char *filename = NULL;
@@ -35,7 +36,7 @@ static int write_csv(sample *samples, size_t len) {
 
     // Store all the samples in the file
     for (size_t i = 0; i < len; i++) {
-        fprintf(fp, "%lu", samples[i].value);
+        fprintf(fp, "%"PRIu64"", samples[i].value);
 
        if (i != len-1) {
         fputc(',', fp);

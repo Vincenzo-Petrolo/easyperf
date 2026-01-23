@@ -8,6 +8,7 @@
 
 typedef enum {
     HELP  = 100, // Special
+    VERSION_FLAG = 101,
     NUMBER = 0,
     STRING = 1,
     FLAG   = 2
